@@ -1,0 +1,16 @@
+{
+  "threshold": 0.5248468186329673,
+  "roc_auc": 0.9763635828557649,
+  "pr_auc": 0.8474118831422122,
+  "confusion_matrix": {
+    "true_negatives": 56849,
+    "false_positives": 15,
+    "false_negatives": 18,
+    "true_positives": 80
+  },
+  "fraud_precision": 0.8421052631578947,
+  "fraud_recall": 0.8163265306122449,
+  "fraud_f1": 0.8290155440414507,
+  "n_test": 56962,
+  "n_test_fraud": 98
+}
