@@ -1,0 +1,31 @@
+# Dataset (150MB+ — download from Kaggle, see README)
+creditcard.csv
+
+# Generated model artifacts (reproduce with `python train_pipeline.py`)
+backend/*.pkl
+backend/*.h5
+backend/*.keras
+backend/threshold.json
+backend/feature_names.json
+sample_test.csv
+assets/*.png
+assets/metrics.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Streamlit
+.streamlit/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Env files
+.env

@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint
+        run: ruff check . --select=E9,F --ignore=F401
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install -r frontend/requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Generate synthetic dataset
+        # The real Kaggle dataset is not checked into the repo (see README).
+        # CI trains on a small synthetic stand-in purely to exercise the
+        # pipeline's code paths -- it says nothing about model quality.
+        # Real evaluation numbers live in assets/metrics.json.
+        run: python scripts/generate_synthetic_dataset.py --rows 4000 --fraud-ratio 0.03
+
+      - name: Run training pipeline
+        run: python train_pipeline.py
+
+      - name: Run backend API tests
+        run: pytest tests/test_api.py -v
+
+      - name: Start backend for frontend tests
+        run: |
+          nohup uvicorn backend.main:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8000/health && break
+            sleep 2
+          done
+
+      - name: Run frontend smoke tests
+        env:
+          BACKEND_URL: http://localhost:8000
+        run: pytest tests/test_frontend.py -v
+
+      - name: Show backend log on failure
+        if: failure()
+        run: cat backend.log || true
